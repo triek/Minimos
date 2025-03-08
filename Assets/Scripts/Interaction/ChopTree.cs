@@ -9,11 +9,13 @@ public class ChopTree : MonoBehaviour
     private ResourceManager resourceManager;
     private ResourceManager.ResourceType resourceType;
     private GameObject pendingTargetObject;
+    private PickupFlower pickupFlower;
 
     private void Awake()
     {
         movementManager = GetComponent<MovementManager>();
         mouseClickMovement = GetComponent<MouseClickMovement>();
+        pickupFlower = GetComponent<PickupFlower>();
     }
 
     private void Update()
@@ -23,7 +25,7 @@ public class ChopTree : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                Debug.Log("Raycast hitted: " + hit.collider.name);
+                //Debug.Log("Raycast hitted: " + hit.collider.name);
                 if (hit.collider.CompareTag("Tree"))
                 {
                     SetHarvestTarget(hit.collider.gameObject, ResourceManager.ResourceType.Wood);
@@ -64,20 +66,26 @@ public class ChopTree : MonoBehaviour
 
     private IEnumerator HarvestCoroutine(GameObject harvestedObject)
     {
-        Debug.Log("HarvestObject: " + harvestedObject.name);
+        Debug.Log("Harvesting: " + harvestedObject.name);
         yield return new WaitForSeconds(1f);
 
-        resourceManager = FindResourceManager(resourceType);
-
-        if (resourceManager != null)
+        // If it's a flower (tree), call PickupFlower script
+        if (harvestedObject.CompareTag("Tree") && pickupFlower != null)
         {
-            resourceManager.AddResource(10);
-            Destroy(harvestedObject);
+            pickupFlower.Pickup(harvestedObject);
         }
-
         else
         {
-            Debug.LogError("No ResourceManager available to add resources!");
+            resourceManager = FindResourceManager(resourceType);
+            if (resourceManager != null)
+            {
+                resourceManager.AddResource(10);
+                Destroy(harvestedObject);
+            }
+            else
+            {
+                Debug.LogError("No ResourceManager available to add resources!");
+            }
         }
     }
 

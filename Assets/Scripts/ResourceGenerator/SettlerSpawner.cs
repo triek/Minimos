@@ -42,7 +42,16 @@ public class SettlerSpawner : MonoBehaviour
     private void SpawnSettler()
     {
         Vector3 spawnPos = GetRandomSpawnPosition();
-        Instantiate(settlerPrefab, spawnPos, Quaternion.identity);
+        GameObject newSettler = Instantiate(settlerPrefab, spawnPos, Quaternion.identity);
+
+        Animator animator = newSettler.GetComponent<Animator>();
+        Transform settlerHead = newSettler.transform.Find("SettlerHead");
+
+        if (animator != null && settlerHead != null)
+        {
+            bool hasFlower = settlerHead.childCount > 0; // Check if SettlerHead has a child
+            animator.SetBool("isPickupFlower", hasFlower);
+        }
     }
 
     private Vector3 GetRandomSpawnPosition()

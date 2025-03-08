@@ -53,5 +53,8 @@ TagManager:
   - name: Settler
     uniqueID: 3385828719
     locked: 0
+  - name: Item
+    uniqueID: 3881149173
+    locked: 0
   m_RenderingLayers:
   - Default
