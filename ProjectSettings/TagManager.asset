@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Settler
   - Tree
+  - Stone
   layers:
   - Default
   - TransparentFX

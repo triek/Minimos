@@ -27,7 +27,7 @@ public class MouseClickMovement : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1))
         {
             OnMouseClick();
         }
@@ -49,7 +49,7 @@ public class MouseClickMovement : MonoBehaviour
         Vector3 mousePos = Input.mousePosition;
         mousePos.z = Camera.main.nearClipPlane;
         targetPos = Camera.main.ScreenToWorldPoint(mousePos);
-        Debug.Log("Mouse Clicked. Target Position: " + targetPos);
+        //Debug.Log("Mouse Clicked. Target Position: " + targetPos);
     }
 
     private void SetMovementState(MovementState state)
@@ -86,7 +86,7 @@ public class MouseClickMovement : MonoBehaviour
                     yield return null;
 
                     // Check if a new target position has been clicked
-                    if (Input.GetMouseButtonDown(0))
+                    if (Input.GetMouseButtonDown(1))
                     {
                         yield break; // Exit the current coroutine
                     }

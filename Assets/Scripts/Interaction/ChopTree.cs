@@ -1,11 +1,14 @@
 using System.Collections;
-using System.Collections.Generic;
+using System.Resources;
 using UnityEngine;
 
 public class ChopTree : MonoBehaviour
 {
     private MovementManager movementManager;
     private MouseClickMovement mouseClickMovement;
+    private ResourceManager resourceManager;
+    private ResourceManager.ResourceType resourceType;
+    private GameObject pendingTargetObject;
 
     private void Awake()
     {
@@ -15,39 +18,81 @@ public class ChopTree : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 Debug.Log("Raycast hitted: " + hit.collider.name);
                 if (hit.collider.CompareTag("Tree"))
                 {
-                    mouseClickMovement.OnMovementComplete += HandleMovementComplete;
+                    SetHarvestTarget(hit.collider.gameObject, ResourceManager.ResourceType.Wood);
                 }
-            } else
+                else if (hit.collider.CompareTag("Stone"))
+                {
+                    SetHarvestTarget(hit.collider.gameObject, ResourceManager.ResourceType.Stone);
+
+                }
+            }
+            else
             {
                 Debug.Log("Raycast missed");
             }
         }
     }
 
+    private void SetHarvestTarget(GameObject target, ResourceManager.ResourceType type)
+    {
+        resourceType = type;
+        pendingTargetObject = target;
+        mouseClickMovement.OnMovementComplete += HandleMovementComplete;
+    }
+
     private void HandleMovementComplete()
     {
-        StartCoroutine(ChopTreeCoroutine());
+        mouseClickMovement.OnMovementComplete -= HandleMovementComplete;
+        if (pendingTargetObject != null)
+        {
+            StartCoroutine(HarvestCoroutine(pendingTargetObject));
+            pendingTargetObject = null; // Clear after use
+        }
+        else
+        {
+            Debug.Log("No target object set when trying to harvest!");
+        }
     }
 
-    private IEnumerator ChopTreeCoroutine()
+    private IEnumerator HarvestCoroutine(GameObject harvestedObject)
     {
-        // Display "chopping tree" message
-        Debug.Log("chopping tree");
-        mouseClickMovement.OnMovementComplete -= HandleMovementComplete;
-
-        // Wait for an additional 1 second before allowing further interactions
+        Debug.Log("HarvestObject: " + harvestedObject.name);
         yield return new WaitForSeconds(1f);
+
+        resourceManager = FindResourceManager(resourceType);
+
+        if (resourceManager != null)
+        {
+            resourceManager.AddResource(10);
+            Destroy(harvestedObject);
+        }
+
+        else
+        {
+            Debug.LogError("No ResourceManager available to add resources!");
+        }
+    }
+
+    private ResourceManager FindResourceManager(ResourceManager.ResourceType type)
+    {
+        ResourceManager[] allManagers = FindObjectsByType<ResourceManager>(FindObjectsSortMode.None);
+
+        foreach (var manager in allManagers)
+        {
+            if (manager.resourceType == type)
+            {
+                return manager;
+            }
+        }
+        Debug.LogError($"ResourceManager for {type} not found!");
+        return null;
     }
 }
-// Q: After message chopping tree, the tree disappears, increase the player's wood resource by 1, how can I do it
-// A: You can create a new script called Resource.cs in the Storage folder. This script will store the player's resources.
-// Q: How can I increase the player's wood resource by 1

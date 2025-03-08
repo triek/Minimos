@@ -6,11 +6,15 @@ public class MovementManager : MonoBehaviour
     private SettlerMovement randomMovement;
     private MouseClickMovement mouseClickMovement;
     private Coroutine countdownCoroutine;
+    private Animator animator;
+
+    private bool isSelected = false;
 
     private void Awake()
     {
         randomMovement = GetComponent<SettlerMovement>();
         mouseClickMovement = GetComponent<MouseClickMovement>();
+        animator = GetComponent<Animator>();
 
         randomMovement.enabled = true;
         mouseClickMovement.enabled = false;
@@ -20,9 +24,9 @@ public class MovementManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (isSelected && Input.GetMouseButtonDown(1))
         {
-            // Stop any ongoing countdown (when the player clicks again during countdown)
+            // Stop any ongoing countdown when player clicks again
             if (countdownCoroutine != null)
             {
                 StopCoroutine(countdownCoroutine);
@@ -58,9 +62,26 @@ public class MovementManager : MonoBehaviour
             countdown -= 1f;
         }
 
-        // When countdown reaches 0 and MouseClickMovement was never enabled, enable randomMovement
-        //Debug.Log("Countdown finished - Enabling randomMovement");
-        randomMovement.enabled = true;
+        // After countdown and no mouse click or selected
+        if (!isSelected)
+        {
+            randomMovement.enabled = true;
+        }
+    }
+    public void SelectCharacter(bool select)
+    {
+        isSelected = select;
+        animator.SetBool("isSelected", isSelected); // Update animator
+
+        if (isSelected)
+        {
+            randomMovement.enabled = false;  // Stop random movement when selected
+        }
+        else
+        {
+            randomMovement.enabled = true;   // Resume random movement if deselected
+            mouseClickMovement.enabled = false;
+        }
     }
 
 }
