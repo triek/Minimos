@@ -36,10 +36,10 @@ public class ChopTree : MonoBehaviour
 
                 }
             }
-            else
-            {
-                Debug.Log("Raycast missed");
-            }
+            //else
+            //{
+            //    Debug.Log("Raycast missed");
+            //}
         }
     }
 
