@@ -6,7 +6,7 @@ public class SettlerSpawner : MonoBehaviour
 {
     [Header("Spawner Settings")]
     public GameObject settlerPrefab; // Settler prefab to spawn
-    public int numberOfSettlers = 5; // Number of settlers to spawn
+    public int numberOfSettlers = 5; // Number of settlers to spawn for batch
     public float spawnDelay = 0.5f; // Delay between spawns
     public float spawnDistance = 2f; // Distance outside the screen to spawn
 
@@ -22,15 +22,29 @@ public class SettlerSpawner : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1) && !isSpawning)
         {
-            StartCoroutine(SpawnSettlers());
+            StartCoroutine(SpawnSettlers(numberOfSettlers));
         }
     }
 
-    private IEnumerator SpawnSettlers()
+    // Call this from your "RedAdd1" button
+    public void SpawnOneSettler()
+    {
+        if (!isSpawning)
+            SpawnSettler();
+    }
+
+    // Call this from your "RedAdd5" button
+    public void SpawnFiveSettlers()
+    {
+        if (!isSpawning)
+            StartCoroutine(SpawnSettlers(5));
+    }
+
+    private IEnumerator SpawnSettlers(int count)
     {
         isSpawning = true;
 
-        for (int i = 0; i < numberOfSettlers; i++)
+        for (int i = 0; i < count; i++)
         {
             SpawnSettler();
             yield return new WaitForSeconds(spawnDelay);

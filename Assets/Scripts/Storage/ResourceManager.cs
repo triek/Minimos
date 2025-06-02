@@ -26,6 +26,7 @@ public class ResourceManager : MonoBehaviour
 
     public enum ResourceType
     {
+        Flower,
         Wood,
         Stone
     }

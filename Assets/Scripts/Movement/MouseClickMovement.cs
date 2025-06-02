@@ -7,6 +7,9 @@ public class MouseClickMovement : MonoBehaviour
     public float moveSpeed = 3;
     public float stopThreshold = 0.01f;
 
+    public delegate void MovementComplete();
+    public event MovementComplete OnMovementComplete;
+
     private enum MovementState { Idling, Moving, Waiting }
     private MovementState currentState = MovementState.Idling;
 
@@ -17,8 +20,7 @@ public class MouseClickMovement : MonoBehaviour
     private List<Node> path;
     private int currentPathIndex;
 
-    public delegate void MovementComplete();
-    public event MovementComplete OnMovementComplete;
+    private bool isTaskMovement = false;
 
     private void Awake()
     {
@@ -29,6 +31,12 @@ public class MouseClickMovement : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
+            // Check if a task is running before allowing movement
+            var taskExecutor = GetComponent<TaskExecutor>();
+            if (taskExecutor != null && taskExecutor.IsTaskRunning)
+            {
+                return;
+            }
             OnMouseClick();
         }
     }
@@ -44,12 +52,23 @@ public class MouseClickMovement : MonoBehaviour
         currentMovementCoroutine = StartCoroutine(FindAndMoveToTarget(targetPos));
     }
 
+    // For player movement
     public void SetTargetPos()
     {
+        isTaskMovement = false;
         Vector3 mousePos = Input.mousePosition;
         mousePos.z = Camera.main.nearClipPlane;
         targetPos = Camera.main.ScreenToWorldPoint(mousePos);
-        //Debug.Log("Mouse Clicked. Target Position: " + targetPos);
+    }
+
+    // For task movement
+    public void SetTargetPosForTask(Vector3 pos)
+    {
+        isTaskMovement = true;
+        targetPos = pos;
+        if (currentMovementCoroutine != null)
+            StopCoroutine(currentMovementCoroutine);
+        currentMovementCoroutine = StartCoroutine(FindAndMoveToTarget(targetPos));
     }
 
     private void SetMovementState(MovementState state)
@@ -85,8 +104,8 @@ public class MouseClickMovement : MonoBehaviour
                     transform.position = Vector3.MoveTowards(transform.position, nextPos, moveSpeed * Time.deltaTime);
                     yield return null;
 
-                    // Check if a new target position has been clicked
-                    if (Input.GetMouseButtonDown(1))
+                    // Only allow player click to interrupt if not task movement
+                    if (!isTaskMovement && Input.GetMouseButtonDown(1))
                     {
                         yield break; // Exit the current coroutine
                     }

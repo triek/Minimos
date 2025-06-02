@@ -20,6 +20,8 @@ public class SettlerMovement : MonoBehaviour
 
     private static HashSet<Vector3> occupiedPositions = new();
 
+    private bool isTaskMovement = false;
+
     private void Awake()
     {
         animator = GetComponent<Animator>();
@@ -27,12 +29,13 @@ public class SettlerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (currentState == MovementState.Idling)
+        if (currentState == MovementState.Idling && !isTaskMovement)
         {
             StartCoroutine(getPos());
             //Debug.Log("Settler wandering");
         }
     }
+
     private void SetMovementState(MovementState state)
     {
         currentState = state;
@@ -125,8 +128,20 @@ public class SettlerMovement : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         SetMovementState(MovementState.Idling);
-
+        isTaskMovement = false;
     }
+
+    public void MoveTo(Vector3 targetPos)
+    {
+        isTaskMovement = true;
+
+        if (currentMovementCoroutine != null)
+            StopCoroutine(currentMovementCoroutine);
+
+        currentMovementCoroutine = StartCoroutine(FindAndMoveToTarget(targetPos));
+    }
+
+
     private void OnDestroy()
     {
         occupiedPositions.Remove(transform.position); // Free up space when settler is destroyed

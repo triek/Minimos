@@ -8,7 +8,7 @@ public class MovementManager : MonoBehaviour
     private Coroutine countdownCoroutine;
     private Animator animator;
 
-    private bool isSelected = false;
+    public bool isSelected = false;
 
     private void Awake()
     {
@@ -24,8 +24,29 @@ public class MovementManager : MonoBehaviour
 
     private void Update()
     {
+        var taskExecutor = GetComponent<TaskExecutor>();
+
+        // If a task is running, block all player movement input, dont affect movement components
+        if (taskExecutor != null && taskExecutor.IsTaskRunning)
+        {
+            //Debug.Log("[MovementManager] Task is running, blocking player movement input.");
+            return;
+        }
+
         if (isSelected && Input.GetMouseButtonDown(1))
         {
+            // Raycast to see what was clicked
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                // Block movement if a flower was clicked
+                if (hit.collider.CompareTag("Flower"))
+                {
+                    return;
+                }
+            }
+
             // Stop any ongoing countdown when player clicks again
             if (countdownCoroutine != null)
             {
@@ -79,8 +100,10 @@ public class MovementManager : MonoBehaviour
         }
         else
         {
-            randomMovement.enabled = true;   // Resume random movement if deselected
-            mouseClickMovement.enabled = false;
+            if (!mouseClickMovement.enabled)
+            {
+                randomMovement.enabled = true;   // Resume random movement if not moving to a destination
+            }
         }
     }
 
