@@ -128,7 +128,7 @@ public class FlowerSelector : MonoBehaviour
             {
                 SetFlowerSelected(flower, true);
                 selectedFlowers.Add(flower);
-                Debug.Log($"Flower selected (area): {flower.name}");
+                //Debug.Log($"Flower selected (area): {flower.name}");
             }
             else
             {

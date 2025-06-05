@@ -50,7 +50,6 @@ public class Action : MonoBehaviour
                 var taskExecutor = GetComponent<TaskExecutor>();
                 if (taskExecutor != null && taskExecutor.IsTaskRunning)
                 {
-                    Debug.Log("[Action] Task is running, blocking right-click movement.");
                     return;
                 }
 
@@ -65,8 +64,7 @@ public class Action : MonoBehaviour
 
                 else
                 {
-                    Debug.Log("[Action] Right-clicked non-flower object.");
-                    // If you have ground movement logic, it would go here.
+                    // Debug.Log("[Action] Right-clicked non-flower object.");
                 }
             }
         }
